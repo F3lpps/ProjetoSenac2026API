@@ -1,0 +1,58 @@
+[project]
+name = "ViajeiAPI"
+version = "0.1.0"
+description = "Está é a API(Application interface) do projeto Viajei."
+authors = [
+    {name = "Fellipe Bernardes",email = "BaianhinhodeMawa@example.com"}
+]
+readme = "README.md"
+requires-python = ">=3.13, <4.0"
+dependencies = [
+    "fastapi[standard] (>=0.139.0,<0.140.0)",
+    "pydantic-settings (>=2.14.2,<3.0.0)",
+    "sqlalchemy (>=2.0.51,<3.0.0)",
+    "alembic (>=1.18.5,<2.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[dependency-groups]
+dev = [
+    "taskipy (>=1.14.1,<2.0.0)",
+    "pytest (>=9.1.1,<10.0.0)",
+    "pytest-cov (>=7.1.0,<8.0.0)",
+    "ruff (>=0.15.18,<0.16.0)",
+    "typos (>=1.47.2,<2.0.0)"
+]
+
+[tool]
+[tool.ruff]
+line-length = 79
+extend-exclude = ['migrations']
+
+[tool.ruff.lint]
+preview = true 
+select = ['I', 'F', 'E', 'W', 'PL', 'PT']
+
+[tool.ruff.format]
+preview = true
+quote-style = 'double'
+
+[tool.pytest]
+pythonpath = ['.']
+addopts = ['-p', 'no:warnings', '--cov=ViajeiAPI', '--cov-context=test']
+
+[tool.typos.files]
+extend-exclude = ["*md"]
+
+[tool.taskipy.tasks]
+lint = 'ruff check'
+pre_format = 'ruff check --fix'
+format = 'ruff format'
+run = 'fastapi dev ViajeiAPI/app.py'
+pre_test = 'task lint'
+test = 'pytest -s -x -vv'
+post_test = 'coverage html --show-contexts'
