@@ -3,15 +3,16 @@ from datetime import datetime
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine, event
+from sqlalchemy import StaticPool, create_engine, event
 from sqlalchemy.orm import Session
 
 from ViajeiAPI.app import app
-from ViajeiAPI.models import table_registry
+from ViajeiAPI.database import get_session
+from ViajeiAPI.models import User, table_registry
 
 
 @contextmanager
-def _mock_db_time(*, model, time=datetime(2026, 6, 17)):
+def _execute_mock_time(*, model, time=datetime(2026, 6, 17)):
 
     def fake_time_hook(mapper, connection, target):
         if hasattr(target, "created_at"):
@@ -26,17 +27,28 @@ def _mock_db_time(*, model, time=datetime(2026, 6, 17)):
 
 @pytest.fixture
 def mock_db_time():
-    return mock_db_time
+    return _execute_mock_time
 
 
 @pytest.fixture
-def client():
-    return TestClient(app)
+def client(session):
+    def get_session_override():
+        return session
+
+    with TestClient(app) as client:
+        app.dependency_overrides[get_session] = get_session_override
+        yield client
+
+    app.dependency_overrides.clear()
 
 
 @pytest.fixture
 def session():
-    engine = create_engine("sqlite:///:memory:")
+    engine = create_engine(
+        "sqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
     table_registry.metadata.create_all(engine)
 
     with Session(engine) as session:
@@ -44,3 +56,13 @@ def session():
 
     table_registry.metadata.drop_all(engine)
     engine.dispose()
+
+
+@pytest.fixture
+def user(session):
+    user = User(username='Teste', email='teste@test.com', senha='testtest')
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+
+    return user
