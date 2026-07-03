@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from ViajeiAPI.app import app
 from ViajeiAPI.database import get_session
 from ViajeiAPI.models import User, table_registry
+from ViajeiAPI.security import get_passwordhash
 
 
 @contextmanager
@@ -60,9 +61,17 @@ def session():
 
 @pytest.fixture
 def user(session):
-    user = User(username='Teste', email='teste@test.com', senha='testtest')
+    senha = 'testtest'
+    user = User(
+        username="Teste",
+        email="teste@test.com",
+        senha=get_passwordhash('testtest'),
+    )
+
     session.add(user)
     session.commit()
     session.refresh(user)
+
+    user.clean_senha = senha
 
     return user

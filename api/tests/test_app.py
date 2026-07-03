@@ -90,3 +90,41 @@ def test_update_user(client, user):
         'email': 'baianinho@example.com',
         'id': 1,
     }
+
+
+def test_update_integrity_error(client, user):
+    # Criando um registro para "baininho"
+    client.post(
+        '/users',
+        json={
+            'username': 'fausto',
+            'email': 'fausto@example.com',
+            'senha': 'secret',
+        },
+    )
+
+    # Alterando o user.username das fixture para fausto
+    response_update = client.put(
+        f'/users/{user.id}',
+        json={
+            'username': 'fausto',
+            'email': 'baianinho@example.com',
+            'senha': 'mynewpassword',
+        },
+    )
+    assert response_update.status_code == HTTPStatus.CONFLICT
+    assert response_update.json() == {
+        'detail': 'Username or Email already exists'
+    }
+
+
+def test_get_token(client, user):
+    response = client.post(
+        '/auth',
+        data={'username': user.email, 'password': user.clean_senha},
+    )
+    token = response.json()
+
+    assert response.status_code == HTTPStatus.OK
+    assert 'access_token' in token
+    assert 'token_type' in token
