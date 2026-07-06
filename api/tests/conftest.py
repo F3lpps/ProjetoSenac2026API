@@ -75,3 +75,12 @@ def user(session):
     user.clean_senha = senha
 
     return user
+
+
+@pytest.fixture
+def token(client, user):
+    response = client.post(
+        '/auth',
+        data={'username': user.email, 'password': user.clean_senha},
+    )
+    return response.json()['create_token']

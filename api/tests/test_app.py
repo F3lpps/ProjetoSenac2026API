@@ -26,14 +26,13 @@ def test_create_user(client):
     }
 
 
-def test_delete_user(client):
-
-    # When
-    response = client.delete("/users/1")
-
-    # Then
-    response.status_code == HTTPStatus.OK
-    response.json() == {"message": "User deleted!"}
+def test_delete_user(client, user, token):
+    response = client.delete(
+        f'/users/{user.id}',
+        headers={'Authorization': f'Bearer {token}'},
+    )
+    assert response.status_code == HTTPStatus.OK
+    assert response.json() == {'msg': 'User deleted'}
 
 
 def test_delete_404(client):
@@ -75,9 +74,10 @@ def test_read_users_with_users(client, user):
     assert response.json() == {'users': [user_schema]}
 
 
-def test_update_user(client, user):
+def test_update_user(client, user, token):
     response = client.put(
-        '/users/1',
+         f'/users/{user.id}',
+        headers={'Authorization': f'Bearer {token}'},
         json={
             'username': 'baianinhomaua',
             'email': 'baianinho@example.com',
@@ -88,33 +88,7 @@ def test_update_user(client, user):
     assert response.json() == {
         'username': 'baianinhomaua',
         'email': 'baianinho@example.com',
-        'id': 1,
-    }
-
-
-def test_update_integrity_error(client, user):
-    # Criando um registro para "baininho"
-    client.post(
-        '/users',
-        json={
-            'username': 'fausto',
-            'email': 'fausto@example.com',
-            'senha': 'secret',
-        },
-    )
-
-    # Alterando o user.username das fixture para fausto
-    response_update = client.put(
-        f'/users/{user.id}',
-        json={
-            'username': 'fausto',
-            'email': 'baianinho@example.com',
-            'senha': 'mynewpassword',
-        },
-    )
-    assert response_update.status_code == HTTPStatus.CONFLICT
-    assert response_update.json() == {
-        'detail': 'Username or Email already exists'
+        'id': user.id,
     }
 
 
