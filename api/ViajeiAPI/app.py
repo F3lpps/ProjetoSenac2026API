@@ -118,7 +118,7 @@ def update_user(
         )
 
 
-@app.post("/Auth", response_model=Token)
+@app.post("/auth", response_model=Token)
 def login_for_access_token(
     form_data: OAuth2PasswordRequestForm = Depends(),
     session: Session = Depends(get_session),
@@ -131,7 +131,7 @@ def login_for_access_token(
             detail="Incorrect email or password",
         )
 
-    if not verify_password(form_data.senha, user.senha):
+    if not verify_password(form_data.password, user.senha):
         raise HTTPException(
             status_code=HTTPStatus.UNAUTHORIZED,
             detail="Incorrect email or password",

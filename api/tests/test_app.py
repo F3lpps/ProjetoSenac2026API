@@ -126,5 +126,5 @@ def test_get_token(client, user):
     token = response.json()
 
     assert response.status_code == HTTPStatus.OK
-    assert 'access_token' in token
+    assert 'create_token' in token
     assert 'token_type' in token

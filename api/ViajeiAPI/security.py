@@ -7,7 +7,7 @@ from pwdlib import PasswordHash
 SECRET_KEY = "your-very-secret-and-exclusive-key"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
-pwd_context = PasswordHash
+pwd_context = PasswordHash.recommended()
 
 
 def create_token(data: dict):
