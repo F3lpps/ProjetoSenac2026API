@@ -1,6 +1,7 @@
 from http import HTTPStatus
 
 from fastapi import Depends, FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
@@ -19,6 +20,21 @@ from ViajeiAPI.security import (
 )
 
 app = FastAPI()
+
+origins = [
+    "http://localhost:3000",
+    "htpp://127.0.0.1:3000",
+    "http://localhost:5000",
+    "htpp://127.0.0.1:5000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 database = []
 
