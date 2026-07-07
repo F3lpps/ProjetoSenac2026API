@@ -8,8 +8,9 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from ViajeiAPI.database import get_session
-from ViajeiAPI.models import User
+from ViajeiAPI.models import Story, User
 from ViajeiAPI.schemas.message import Message
+from ViajeiAPI.schemas.story import StoryPublic, StorySchema
 from ViajeiAPI.schemas.token import Token
 from ViajeiAPI.schemas.user import Userlist, UserPublic, UserSchema
 from ViajeiAPI.security import (
@@ -161,3 +162,23 @@ def login_for_access_token(
     access_token = create_token(data={"sub": user.email})
 
     return {"create_token": access_token, "token_type": "bearer"}
+
+
+@app.post('/story', status_code=HTTPStatus.CREATED, response_model=StoryPublic)
+def create_story(
+    story: StorySchema,
+    session: Session = Depends(get_session),
+    user: User = Depends(get_current_user)
+                 ):
+
+    new_story = Story(
+        author=story.author,
+        title=story.title,
+        story=story.story
+    )
+
+    session.add(new_story)
+    session.commit()
+    session.refresh(new_story)
+
+    return new_story

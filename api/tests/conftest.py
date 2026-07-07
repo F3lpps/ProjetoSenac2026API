@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from ViajeiAPI.app import app
 from ViajeiAPI.database import get_session
 from ViajeiAPI.models import User, table_registry
-from ViajeiAPI.security import get_passwordhash
+from ViajeiAPI.security import get_current_user, get_passwordhash
 
 
 @contextmanager
@@ -84,3 +84,14 @@ def token(client, user):
         data={'username': user.email, 'password': user.clean_senha},
     )
     return response.json()['create_token']
+
+
+@pytest.fixture
+def authenticated_user(client, user):
+    def mock_get_current_user():
+        return user
+
+    app.dependency_overrides[get_current_user] = mock_get_current_user
+    yield client
+
+    app.dependency_overrides.clear()
