@@ -109,8 +109,8 @@ def test_create_story(authenticated_user):
     response = authenticated_user.post(
         "/story",
         json={
-            "author": "baianinhodemaua",
-            "title": "A praça é nossa",
+            "author": "jj",
+            "title": "Titulo",
             "story": "Era uma vez...",
         },
 )
@@ -118,6 +118,6 @@ def test_create_story(authenticated_user):
     assert response.status_code == HTTPStatus.CREATED
     assert response.json() == {
         "id": 1,
-        "title": "A praça é nossa",
-        "email": "example@example.com"
+        "title": "Titulo",
+        "email": "teste@test.com"
     }

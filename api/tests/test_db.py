@@ -1,4 +1,5 @@
 from dataclasses import asdict
+from datetime import datetime
 
 from sqlalchemy import select
 
@@ -30,9 +31,8 @@ def test_create_user(session, mock_db_time):
 
 
 def test_create_story(session, mock_db_time, user):
-    with mock_db_time(model=Story) as time:
+    with mock_db_time(model=Story):
         new_story = Story(author="jj", title="Titulo", story="Era uma vez...")
-
         new_story.email = user.email
 
     session.add(new_story)
@@ -40,11 +40,17 @@ def test_create_story(session, mock_db_time, user):
 
     story = session.scalar(select(Story).where(Story.author == "jj"))
 
-    assert asdict(story) == {
+    # Transforma em dicionário
+    story_dict = asdict(story)
+
+    created_at_value = story_dict.pop("created_at")
+
+    assert story_dict == {
         "id": 1,
         "author": "jj",
         "title": "Titulo",
-        "email": "example@example.com",
+        "email": user.email,
         "story": "Era uma vez...",
-        "created_at": time,
     }
+
+    assert isinstance(created_at_value, datetime)

@@ -177,6 +177,8 @@ def create_story(
         story=story.story
     )
 
+    new_story.email = user.email
+
     session.add(new_story)
     session.commit()
     session.refresh(new_story)
